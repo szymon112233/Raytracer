@@ -142,53 +142,26 @@ Vec3f trace(
     float bias = 1e-4; // add some bias to the point from which we will be tracing
     bool inside = false;
     if (raydir.dot(nhit) > 0) nhit = -nhit, inside = true;
-    /*if ((sphere->transparency > 0 || sphere->reflection > 0) && depth < MAX_RAY_DEPTH) {
-        float facingratio = -raydir.dot(nhit);
-        // change the mix value to tweak the effect
-        float fresneleffect = mix(pow(1 - facingratio, 3), 1, 0.1);
-        // compute reflection direction (not need to normalize because all vectors
-        // are already normalized)
-        Vec3f refldir = raydir - nhit * 2 * raydir.dot(nhit);
-        refldir.normalize();
-        Vec3f reflection = trace(phit + nhit * bias, refldir, spheres, spheresSize, depth + 1);
-        Vec3f refraction = 0;
-        // if the sphere is also transparent compute refraction ray (transmission)
-        if (sphere->transparency) {
-            float ior = 1.1, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
-            float cosi = -nhit.dot(raydir);
-            float k = 1 - eta * eta * (1 - cosi * cosi);
-            Vec3f refrdir = raydir * eta + nhit * (eta *  cosi - sqrt(k));
-            refrdir.normalize();
-            refraction = trace(phit - nhit * bias, refrdir, spheres, spheresSize, depth + 1);
-        }
-        // the result is a mix of reflection and refraction (if the sphere is transparent)
-        surfaceColor = (
-            reflection * fresneleffect +
-            refraction * (1 - fresneleffect) * sphere->transparency) * sphere->surfaceColor;
-    }
-    else {*/
-        // it's a diffuse object, no need to raytrace any further
-        for (int i = 0; i < spheresSize; ++i) {
-            if (spheres[i].emissionColor.x > 0) {
-                // this is a light
-                Vec3f transmission = 1;
-                Vec3f lightDirection = spheres[i].center - phit;
-                lightDirection.normalize();
-                for (int j = 0; j < spheresSize; ++j) {
-                    if (i != j) {
-                        float t0, t1;
-                        if (spheres[j].intersect(phit + nhit * bias, lightDirection, t0, t1)) {
-                            transmission = 0;
-                            break;
-                        }
-                    }
-                }
-                surfaceColor += sphere->surfaceColor * transmission *
-                max(float(0), nhit.dot(lightDirection)) * spheres[i].emissionColor;
-            }
-        }
-    //}
-    
+		// it's a diffuse object, no need to raytrace any further
+		for (int i = 0; i < spheresSize; ++i) {
+			if (spheres[i].emissionColor.x > 0) {
+				// this is a light
+				Vec3f transmission = 1;
+				Vec3f lightDirection = spheres[i].center - phit;
+				lightDirection.normalize();
+				for (int j = 0; j < spheresSize; ++j) {
+					if (i != j) {
+						float t0, t1;
+						if (spheres[j].intersect(phit + nhit * bias, lightDirection, t0, t1)) {
+							transmission = 0;
+							break;
+						}
+					}
+				}
+				surfaceColor += sphere->surfaceColor * transmission *
+				max(float(0), nhit.dot(lightDirection)) * spheres[i].emissionColor;
+			}
+		}
     return surfaceColor + sphere->emissionColor;
 }
 
@@ -245,7 +218,7 @@ void render(Sphere *spheres, int spheresSize)
 int main(int argc, char **argv)
 {
     srand(13);
-	int spheresSize = 6;
+	int spheresSize = 7;
 	Sphere *spheres;
 	cudaMallocManaged(&spheres, spheresSize * sizeof(Sphere));
     // position, radius, surface color, reflectivity, transparency, emission color
@@ -254,8 +227,9 @@ int main(int argc, char **argv)
     spheres[2] = Sphere(Vec3f( 5.0,     -1, -15),     2, Vec3f(0.90, 0.76, 0.46), 1, 0.0);
     spheres[3] = Sphere(Vec3f( 5.0,      0, -25),     3, Vec3f(0.65, 0.77, 0.97), 1, 0.0);
     spheres[4] = Sphere(Vec3f(-5.5,      0, -15),     3, Vec3f(0.90, 0.90, 0.90), 1, 0.0);
+	spheres[5] = Sphere(Vec3f(-5.5, -5, -15), 3, Vec3f(0.90, 0.90, 0.90), 1, 0.0);
     // light
-    spheres[5] = Sphere(Vec3f( 0.0,     20, -30),     3, Vec3f(0.00, 0.00, 0.00), 0, 0.0, Vec3f(3));
+    spheres[6] = Sphere(Vec3f( 0.0,     20, -30),     3, Vec3f(0.00, 0.00, 0.00), 0, 0.0, Vec3f(3));
     render(spheres, spheresSize);
 	cudaFree(spheres);
     
