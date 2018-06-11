@@ -227,7 +227,7 @@ int main(int argc, char **argv)
     spheres[2] = Sphere(Vec3f( 5.0,     -1, -15),     2, Vec3f(0.90, 0.76, 0.46), 1, 0.0);
     spheres[3] = Sphere(Vec3f( 5.0,      0, -25),     3, Vec3f(0.65, 0.77, 0.97), 1, 0.0);
     spheres[4] = Sphere(Vec3f(-5.5,      0, -15),     3, Vec3f(0.90, 0.90, 0.90), 1, 0.0);
-	spheres[5] = Sphere(Vec3f(-5.5, -5, -15), 3, Vec3f(0.90, 0.90, 0.90), 1, 0.0);
+	spheres[5] = Sphere(Vec3f(3, 5, -30), 1, Vec3f(0.3, 0.50, 0.20), 1, 0.0);
     // light
     spheres[6] = Sphere(Vec3f( 0.0,     20, -30),     3, Vec3f(0.00, 0.00, 0.00), 0, 0.0, Vec3f(3));
     render(spheres, spheresSize);
